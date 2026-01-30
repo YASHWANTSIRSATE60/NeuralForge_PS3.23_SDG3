@@ -1,115 +1,148 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>NeuralForge PS3.23 – AI Emergency Triage</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 40px;
-      text-align: center;
-    }
-    h1 {
-      color: #38bdf8;
-    }
-    textarea, input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: none;
-    }
-    button {
-      margin-top: 15px;
-      padding: 15px;
-      width: 100%;
-      background: #ef4444;
-      color: white;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .card {
-      margin-top: 20px;
-      padding: 20px;
-      background: #020617;
-      border-radius: 10px;
-      border: 2px solid #38bdf8;
-      text-align: left;
-    }
-    .tag {
-      display: inline-block;
-      padding: 5px 10px;
-      background: #1e40af;
-      border-radius: 6px;
-      margin: 5px;
-      font-size: 12px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>NeuralForge PS3.23 – AI Emergency Triage System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body{
+            margin:0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: radial-gradient(circle at top, #0f172a, #020617);
+            color:white;
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .app{
+            width:95%;
+            max-width:900px;
+            background:rgba(15,23,42,0.85);
+            border:1px solid #0ea5e9;
+            border-radius:16px;
+            padding:30px;
+            box-shadow:0 0 40px rgba(14,165,233,0.15);
+        }
+        h1{
+            text-align:center;
+            color:#38bdf8;
+            margin-bottom:5px;
+        }
+        h2{
+            text-align:center;
+            font-weight:normal;
+            font-size:16px;
+            color:#cbd5f5;
+            margin-bottom:25px;
+        }
+        textarea,input{
+            width:100%;
+            padding:14px;
+            border-radius:10px;
+            border:none;
+            outline:none;
+            font-size:15px;
+            margin-bottom:15px;
+        }
+        textarea{resize:none;height:90px;}
+        button{
+            width:100%;
+            padding:16px;
+            border:none;
+            border-radius:12px;
+            background:#ef4444;
+            color:white;
+            font-size:16px;
+            cursor:pointer;
+            transition:0.2s;
+        }
+        button:hover{background:#dc2626;}
+        .output{
+            margin-top:25px;
+            padding:20px;
+            border-radius:12px;
+            background:rgba(2,6,23,0.8);
+            border:1px solid #0ea5e9;
+        }
+        .output h3{margin-top:0;color:#38bdf8;}
+        .row{margin-bottom:8px;}
+        .tag{
+            display:inline-block;
+            padding:6px 10px;
+            border-radius:20px;
+            background:#1d4ed8;
+            margin:4px 6px 0 0;
+            font-size:12px;
+        }
+    </style>
 </head>
-
 <body>
-  <div class="container">
+
+<div class="app">
     <h1>🚨 NeuralForge PS3.23</h1>
-    <h3>AI Emergency Triage System (SDG 3)</h3>
+    <h2>AI Emergency Triage System (SDG 3)</h2>
 
-    <p>Type an emergency message and see AI-based triage decision.</p>
+    <textarea id="message" placeholder="Describe the emergency (e.g. building collapse, fire accident, heart attack, flood rescue, robbery)"></textarea>
+    <input id="location" placeholder="Enter location (city / area / GPS)" />
 
-    <textarea id="msg" placeholder="Example: Building collapsed, people trapped"></textarea>
-    <input id="loc" placeholder="Location (e.g. Nagpur, Zone 4)" />
+    <button onclick="sendEmergency()">Send Emergency</button>
 
-    <button onclick="simulate()">Send Emergency</button>
+    <div class="output" id="output" style="display:none"></div>
+</div>
 
-    <div id="output" class="card" style="display:none;"></div>
-  </div>
+<script>
+async function sendEmergency(){
+    const message = document.getElementById("message").value;
+    const location = document.getElementById("location").value;
 
-  <script>
-    function simulate(){
-      const msg = document.getElementById("msg").value.toLowerCase();
-      const loc = document.getElementById("loc").value;
-
-      let type = "General Emergency";
-      let priority = "LOW";
-      let team = "Medical Team";
-
-      if(msg.includes("fire")){
-        type = "Fire Accident";
-        priority = "HIGH";
-        team = "Fire Team";
-      }
-
-      if(msg.includes("collapse") || msg.includes("earthquake")){
-        type = "Structural Collapse";
-        priority = "CRITICAL";
-        team = "Disaster Response Team";
-      }
-
-      document.getElementById("output").style.display = "block";
-      document.getElementById("output").innerHTML = `
-        <h3>AI Decision Output</h3>
-        <p><b>Type:</b> ${type}</p>
-        <p><b>Priority:</b> ${priority}</p>
-        <p><b>Location:</b> ${loc}</p>
-        <p><b>Assigned Team:</b> ${team}</p>
-        <p><b>Status:</b> ASSIGNED</p>
-        <p><b>ETA:</b> 7 Minutes</p>
-
-        <div>
-          <span class="tag">AI Analysis</span>
-          <span class="tag">Routing Engine</span>
-          <span class="tag">Priority Engine</span>
-          <span class="tag">SDG 3</span>
-        </div>
-      `;
+    if(!message || !location){
+        alert("Please enter emergency message and location");
+        return;
     }
-  </script>
+
+    document.getElementById("output").style.display = "block";
+    document.getElementById("output").innerHTML = "<h3>Processing emergency with AI...</h3>";
+
+    try{
+        const res = await fetch("https://neuralforge-backend.onrender.com/api/emergency",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({
+                message:message,
+                location:location
+            })
+        });
+
+        const data = await res.json();
+
+        document.getElementById("output").innerHTML = `
+            <h3>AI Decision Output</h3>
+            <div class="row"><b>Category:</b> ${data.ai_analysis.category}</div>
+            <div class="row"><b>Priority:</b> ${data.ai_analysis.priority}</div>
+            <div class="row"><b>Severity:</b> ${data.ai_analysis.severity}</div>
+            <div class="row"><b>Risk:</b> ${data.ai_analysis.risk}</div>
+            <div class="row"><b>Required Help:</b> ${data.ai_analysis.required_help}</div>
+            <div class="row"><b>Routing Decision:</b> ${data.routing_decision}</div>
+            <div class="row"><b>Assigned Team:</b> ${data.assigned_team}</div>
+            <div class="row"><b>Location:</b> ${data.location}</div>
+            <div class="row"><b>Status:</b> ${data.status}</div>
+
+            <div style="margin-top:12px;">
+                <span class="tag">AI Engine</span>
+                <span class="tag">Routing Engine</span>
+                <span class="tag">Priority Engine</span>
+                <span class="tag">Authority Resolver</span>
+                <span class="tag">SDG 3</span>
+            </div>
+        `;
+
+    }catch(e){
+        document.getElementById("output").innerHTML = `<h3>Error</h3><p>${e}</p>`;
+    }
+}
+</script>
+
 </body>
 </html>
