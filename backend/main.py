@@ -1,30 +1,123 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from ai_engine import analyze_emergency
-from authority_engine import resolve_authority
-from notify import send_notification
+from typing import Dict
+import os
 
-app = FastAPI()
+# Internal engines
+from ai_engine import analyze_emergency
+from routing_engine import route_emergency
+from team_engine import assign_team
+from notify import send_notification   # if not created yet, we will add next
+
+app = FastAPI(title="NeuralForge PS3.23 - AI Emergency Backend")
+
+# -----------------------------
+# Models
+# -----------------------------
 
 class Emergency(BaseModel):
     message: str
     location: str
 
+
+class AIResult(BaseModel):
+    category: str
+    severity: str
+    priority: str
+    confidence: float
+
+
+# -----------------------------
+# Health Check (REQUIRED FOR RENDER)
+# -----------------------------
+
+@app.get("/healthz")
+def health_check():
+    return {"status": "ok", "service": "neuralforge-backend"}
+
+
+# -----------------------------
+# Core API
+# -----------------------------
+
 @app.post("/api/emergency")
 def handle_emergency(data: Emergency):
-    ai_result = analyze_emergency(data.message)
+    """
+    Full AI Emergency Pipeline:
+    User Message
+        ↓
+    AI Classification
+        ↓
+    Category + Severity + Priority
+        ↓
+    Authority Routing
+        ↓
+    Team Assignment
+        ↓
+    Notification Dispatch
+        ↓
+    Structured Response
+    """
 
-    # Example parsed output (you parse JSON from AI in real system)
-    category = "DISASTER"
-    priority = "CRITICAL"
+    # 1️⃣ AI ANALYSIS
+    ai_result: Dict = analyze_emergency(data.message)
 
-    authority = resolve_authority(category)
+    """
+    Expected ai_result format:
+    {
+        "category": "DISASTER",
+        "severity": "HIGH",
+        "priority": "CRITICAL",
+        "confidence": 0.92
+    }
+    """
 
-    notification = send_notification(authority, data.message, data.location, priority)
+    category = ai_result.get("category", "UNKNOWN")
+    severity = ai_result.get("severity", "LOW")
+    priority = ai_result.get("priority", "LOW")
+    confidence = ai_result.get("confidence", 0.0)
 
+    # 2️⃣ ROUTING
+    authority = route_emergency(category)
+
+    # 3️⃣ TEAM ASSIGNMENT
+    team = assign_team(category, severity)
+
+    # 4️⃣ NOTIFICATION
+    notification_status = send_notification(
+        authority=authority,
+        team=team,
+        message=data.message,
+        location=data.location,
+        priority=priority
+    )
+
+    # 5️⃣ RESPONSE
     return {
-        "ai_analysis": ai_result,
-        "authority": authority,
-        "notification": notification,
-        "status": "DISPATCHED"
+        "status": "DISPATCHED",
+        "ai_analysis": {
+            "category": category,
+            "severity": severity,
+            "priority": priority,
+            "confidence": confidence
+        },
+        "routing": {
+            "authority": authority,
+            "team": team
+        },
+        "notification": notification_status
+    }
+
+
+# -----------------------------
+# Root
+# -----------------------------
+
+@app.get("/")
+def root():
+    return {
+        "service": "NeuralForge PS3.23 AI Emergency System",
+        "status": "running",
+        "docs": "/docs",
+        "health": "/healthz"
     }
