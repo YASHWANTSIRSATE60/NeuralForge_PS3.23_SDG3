@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NeuralForge PS3.23 – AI Emergency Triage</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 40px;
+      text-align: center;
+    }
+    h1 {
+      color: #38bdf8;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      margin-top: 15px;
+      padding: 15px;
+      width: 100%;
+      background: #ef4444;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .card {
+      margin-top: 20px;
+      padding: 20px;
+      background: #020617;
+      border-radius: 10px;
+      border: 2px solid #38bdf8;
+      text-align: left;
+    }
+    .tag {
+      display: inline-block;
+      padding: 5px 10px;
+      background: #1e40af;
+      border-radius: 6px;
+      margin: 5px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🚨 NeuralForge PS3.23</h1>
+    <h3>AI Emergency Triage System (SDG 3)</h3>
+
+    <p>Type an emergency message and see AI-based triage decision.</p>
+
+    <textarea id="msg" placeholder="Example: Building collapsed, people trapped"></textarea>
+    <input id="loc" placeholder="Location (e.g. Nagpur, Zone 4)" />
+
+    <button onclick="simulate()">Send Emergency</button>
+
+    <div id="output" class="card" style="display:none;"></div>
+  </div>
+
+  <script>
+    function simulate(){
+      const msg = document.getElementById("msg").value.toLowerCase();
+      const loc = document.getElementById("loc").value;
+
+      let type = "General Emergency";
+      let priority = "LOW";
+      let team = "Medical Team";
+
+      if(msg.includes("fire")){
+        type = "Fire Accident";
+        priority = "HIGH";
+        team = "Fire Team";
+      }
+
+      if(msg.includes("collapse") || msg.includes("earthquake")){
+        type = "Structural Collapse";
+        priority = "CRITICAL";
+        team = "Disaster Response Team";
+      }
+
+      document.getElementById("output").style.display = "block";
+      document.getElementById("output").innerHTML = `
+        <h3>AI Decision Output</h3>
+        <p><b>Type:</b> ${type}</p>
+        <p><b>Priority:</b> ${priority}</p>
+        <p><b>Location:</b> ${loc}</p>
+        <p><b>Assigned Team:</b> ${team}</p>
+        <p><b>Status:</b> ASSIGNED</p>
+        <p><b>ETA:</b> 7 Minutes</p>
+
+        <div>
+          <span class="tag">AI Analysis</span>
+          <span class="tag">Routing Engine</span>
+          <span class="tag">Priority Engine</span>
+          <span class="tag">SDG 3</span>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
