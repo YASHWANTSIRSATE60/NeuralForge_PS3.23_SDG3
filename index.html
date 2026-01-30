@@ -76,6 +76,16 @@
             margin:4px 6px 0 0;
             font-size:12px;
         }
+        pre{
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background:#020617;
+            padding:12px;
+            border-radius:8px;
+            border:1px solid #0ea5e9;
+            color:#e0f2fe;
+            font-size:13px;
+        }
     </style>
 </head>
 <body>
@@ -102,8 +112,9 @@ async function sendEmergency(){
         return;
     }
 
-    document.getElementById("output").style.display = "block";
-    document.getElementById("output").innerHTML = "<h3>Processing emergency with AI...</h3>";
+    const output = document.getElementById("output");
+    output.style.display = "block";
+    output.innerHTML = "<h3>Processing emergency with AI...</h3>";
 
     try{
         const res = await fetch("https://neuralforge-backend.onrender.com/api/emergency",{
@@ -115,31 +126,35 @@ async function sendEmergency(){
             })
         });
 
+        if(!res.ok){
+            throw new Error("Backend error: " + res.status);
+        }
+
         const data = await res.json();
 
-        document.getElementById("output").innerHTML = `
+        output.innerHTML = `
             <h3>AI Decision Output</h3>
-            <div class="row"><b>Category:</b> ${data.ai_analysis.category}</div>
-            <div class="row"><b>Priority:</b> ${data.ai_analysis.priority}</div>
-            <div class="row"><b>Severity:</b> ${data.ai_analysis.severity}</div>
-            <div class="row"><b>Risk:</b> ${data.ai_analysis.risk}</div>
-            <div class="row"><b>Required Help:</b> ${data.ai_analysis.required_help}</div>
-            <div class="row"><b>Routing Decision:</b> ${data.routing_decision}</div>
-            <div class="row"><b>Assigned Team:</b> ${data.assigned_team}</div>
+
+            <div class="row"><b>Raw AI Analysis (Gemini Output)</b></div>
+            <pre>${data.ai_raw}</pre>
+
             <div class="row"><b>Location:</b> ${data.location}</div>
             <div class="row"><b>Status:</b> ${data.status}</div>
 
             <div style="margin-top:12px;">
                 <span class="tag">AI Engine</span>
-                <span class="tag">Routing Engine</span>
-                <span class="tag">Priority Engine</span>
-                <span class="tag">Authority Resolver</span>
+                <span class="tag">Gemini AI</span>
+                <span class="tag">FastAPI</span>
+                <span class="tag">Render</span>
                 <span class="tag">SDG 3</span>
             </div>
         `;
 
     }catch(e){
-        document.getElementById("output").innerHTML = `<h3>Error</h3><p>${e}</p>`;
+        output.innerHTML = `
+            <h3>Error</h3>
+            <p>${e.message}</p>
+        `;
     }
 }
 </script>
