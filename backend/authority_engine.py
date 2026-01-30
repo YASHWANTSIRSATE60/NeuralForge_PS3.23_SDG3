@@ -1,14 +1,45 @@
-AUTHORITY_MAP = {
-    "MEDICAL": "Emergency Medical Services",
-    "SAFETY": "Police Department",
-    "DISASTER": "Disaster Response Authority",
-    "CRIME": "Police Department",
-    "INFRASTRUCTURE": "Municipal Corporation",
-    "WOMEN_CHILD": "Women Safety Cell",
-    "MENTAL_HEALTH": "Mental Health Helpline",
-    "ANIMAL_RESCUE": "Animal Welfare Department",
-    "PUBLIC_SERVICE": "Local Administration"
-}
+# authority_engine.py
 
-def resolve_authority(category):
-    return AUTHORITY_MAP.get(category, "General Emergency Authority")
+def resolve_authority(authority: str) -> dict:
+    """
+    Maps AI authority decision to real-world response units
+    """
+
+    authority_map = {
+        "police": {
+            "unit": "Police Control Room",
+            "contact": "112",
+            "department": "Law Enforcement"
+        },
+        "ambulance": {
+            "unit": "Emergency Medical Services",
+            "contact": "108",
+            "department": "Medical Response"
+        },
+        "fire_brigade": {
+            "unit": "Fire Department",
+            "contact": "101",
+            "department": "Fire & Rescue"
+        },
+        "disaster_response": {
+            "unit": "National Disaster Response Force",
+            "contact": "112",
+            "department": "Disaster Management"
+        },
+        "rescue_team": {
+            "unit": "Rescue Operations Unit",
+            "contact": "112",
+            "department": "Rescue Services"
+        },
+        "manual_review": {
+            "unit": "Human Control Center",
+            "contact": "internal",
+            "department": "Operations Team"
+        }
+    }
+
+    return authority_map.get(authority, {
+        "unit": "Human Control Center",
+        "contact": "internal",
+        "department": "Operations Team"
+    })
