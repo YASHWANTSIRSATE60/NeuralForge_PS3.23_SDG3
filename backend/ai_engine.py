@@ -1,8 +1,6 @@
 import os
 import google.generativeai as genai
-import json
 
-# Load API key from Render Environment Variables
 GEMINI_API_KEY = os.getenv("AIzaSyC2duxKFeQ9STHv83NbPbU4HElPGybHsH0")
 
 genai.configure(api_key=GEMINI_API_KEY)
@@ -11,38 +9,32 @@ model = genai.GenerativeModel("gemini-pro")
 
 def analyze_emergency(message: str):
     prompt = f"""
-You are an AI emergency classification system.
+You are an AI emergency triage system.
 
-Analyze the emergency message and return ONLY JSON in this format:
+Analyze the message and return ONLY valid JSON:
 
+Message: "{message}"
+
+Format:
 {{
-  "category": "DISASTER | MEDICAL | FIRE | CRIME | ACCIDENT | FLOOD | EARTHQUAKE | INFRASTRUCTURE | OTHER",
-  "severity": "LOW | MEDIUM | HIGH | EXTREME",
+  "category": "MEDICAL | FIRE | CRIME | DISASTER | INFRASTRUCTURE | WOMEN_SAFETY | CHILD_SAFETY | ACCIDENT | GENERAL",
+  "severity": "LOW | MEDIUM | HIGH | CRITICAL",
   "priority": "LOW | MEDIUM | HIGH | CRITICAL",
-  "confidence": 0.0-1.0
+  "risk": "LOW | MEDIUM | HIGH",
+  "required_help": "text"
 }}
-
-Rules:
-- No explanation
-- No text
-- No markdown
-- Only valid JSON
-
-Emergency message:
-\"\"\"{message}\"\"\"
 """
 
     response = model.generate_content(prompt)
+    text = response.text.strip()
 
     try:
-        text = response.text.strip()
-        data = json.loads(text)
-        return data
-    except Exception as e:
-        # fallback safety
+        return eval(text)
+    except:
         return {
-            "category": "OTHER",
+            "category": "GENERAL",
             "severity": "LOW",
             "priority": "LOW",
-            "confidence": 0.1
+            "risk": "LOW",
+            "required_help": "General Assistance"
         }
