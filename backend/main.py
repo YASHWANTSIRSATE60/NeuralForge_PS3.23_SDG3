@@ -1,83 +1,101 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from ai_engine import analyze_emergency
+import os
+import json
+import google.generativeai as genai
 
-app = FastAPI(title="NeuralForge PS3.23 AI Emergency System")
+# -----------------------------
+# CONFIG
+# -----------------------------
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# -----------------------
-# CORS (Frontend Access)
-# -----------------------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],   # GitHub Pages / any frontend
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if not GEMINI_API_KEY:
+    raise RuntimeError("❌ GEMINI_API_KEY not found in environment variables")
 
-# -----------------------
-# Models
-# -----------------------
+genai.configure(api_key=GEMINI_API_KEY)
+
+# ✅ Working Gemini model (2025)
+model = genai.GenerativeModel("models/gemini-1.5-flash")
+
+app = FastAPI(title="NeuralForge PS3.23 Backend", version="1.0")
+
+# -----------------------------
+# MODELS
+# -----------------------------
 class Emergency(BaseModel):
     message: str
     location: str
 
-# -----------------------
-# Health Check
-# -----------------------
+# -----------------------------
+# HEALTH CHECK
+# -----------------------------
 @app.get("/healthz")
 def health():
-    return {"status": "ok", "service": "NeuralForge Backend"}
+    return {"status": "ok"}
 
-# -----------------------
-# Root
-# -----------------------
-@app.get("/")
-def root():
-    return {
-        "service": "NeuralForge PS3.23",
-        "system": "AI Emergency Triage Platform",
-        "api": "/api/emergency",
-        "status": "running"
-    }
+# -----------------------------
+# AI ENGINE
+# -----------------------------
+def ai_analyze(message: str):
+    prompt = f"""
+You are an AI emergency triage system.
 
-# -----------------------
-# Authority Mapping
-# -----------------------
-AUTHORITY_MAP = {
-    "MEDICAL": {"name": "Health Services", "team": "Ambulance Unit"},
-    "FIRE": {"name": "Fire Department", "team": "Fire Response Unit"},
-    "CRIME": {"name": "Police Department", "team": "Police Unit"},
-    "DISASTER": {"name": "Disaster Response Force", "team": "NDRF/SDRF Team"},
-    "RESCUE": {"name": "Rescue Services", "team": "Search & Rescue Unit"},
-    "ACCIDENT": {"name": "Emergency Response", "team": "Rescue + Ambulance"},
-    "INFRASTRUCTURE": {"name": "Municipal Corporation", "team": "Municipal Emergency Team"},
-    "GENERAL": {"name": "Local Control Room", "team": "General Response Team"}
-}
+Analyze the emergency message and return ONLY valid JSON in this format:
 
-# -----------------------
-# Main API
-# -----------------------
+{{
+  "category": "medical/fire/disaster/crime/rescue/accident",
+  "priority": "low/medium/high/critical",
+  "severity": "low/medium/high/critical",
+  "risk": "low/medium/high/critical",
+  "required_help": "short clear instruction",
+  "authority": "police/ambulance/fire_brigade/disaster_response/rescue_team"
+}}
+
+Emergency message:
+"{message}"
+"""
+
+    response = model.generate_content(prompt)
+
+    text = response.text.strip()
+
+    # Safety cleanup
+    text = text.replace("```json", "").replace("```", "").strip()
+
+    try:
+        return json.loads(text)
+    except:
+        return {
+            "category": "unknown",
+            "priority": "unknown",
+            "severity": "unknown",
+            "risk": "unknown",
+            "required_help": "AI parsing failed",
+            "authority": "manual_review"
+        }
+
+# -----------------------------
+# ROUTE
+# -----------------------------
 @app.post("/api/emergency")
 def handle_emergency(data: Emergency):
+    ai_result = ai_analyze(data.message)
 
-    # AI Intelligence
-    ai_result = analyze_emergency(data.message)
-
-    category = ai_result.get("category", "GENERAL")
-
-    # Authority Resolution
-    authority = AUTHORITY_MAP.get(category, AUTHORITY_MAP["GENERAL"])
-
-    # Dispatch Simulation
-    dispatch_packet = {
-        "ai_analysis": ai_result,
-        "authority": authority,
-        "location": data.location,
-        "dispatch_status": "DISPATCHED",
-        "system": "NeuralForge AI Core",
-        "confidence": "AI-verified"
+    routing_map = {
+        "police": "Police Control Room",
+        "ambulance": "Emergency Medical Services",
+        "fire_brigade": "Fire Department",
+        "disaster_response": "Disaster Response Force",
+        "rescue_team": "Rescue Operations Unit",
+        "manual_review": "Human Operator Review"
     }
 
-    return dispatch_packet
+    assigned_team = routing_map.get(ai_result.get("authority"), "Manual Review")
+
+    return {
+        "ai_analysis": ai_result,
+        "routing_decision": ai_result.get("authority"),
+        "assigned_team": assigned_team,
+        "location": data.location,
+        "status": "DISPATCHED"
+    }
