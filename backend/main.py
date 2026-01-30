@@ -1,49 +1,61 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from ai_engine import analyze_emergency
-from routing_engine import route_case
-from team_engine import assign_team
+import os
+import google.generativeai as genai
+
+# --------------------
+# CONFIG
+# --------------------
+GEMINI_API_KEY = os.getenv("AIzaSyC2duxKFeQ9STHv83NbPbU4HElPGybHsH0")
+genai.configure(api_key=GEMINI_API_KEY)
+
+model = genai.GenerativeModel("gemini-pro")
 
 app = FastAPI()
 
-# Add CORS middleware so browser JS (localhost or deployed frontend) can call the API
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        # add your frontend deploy URL(s) here, or use "*" for quick testing
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
+# --------------------
+# MODELS
+# --------------------
 class Emergency(BaseModel):
     message: str
     location: str
 
+# --------------------
+# HEALTH CHECK
+# --------------------
 @app.get("/healthz")
 def health():
     return {"status": "ok"}
 
+# --------------------
+# AI ANALYSIS
+# --------------------
+def ai_analyze(message: str):
+    prompt = f"""
+    You are an emergency classification AI.
+
+    Classify this emergency into:
+    category: (medical, fire, disaster, crime, rescue, accident)
+    priority: (low, medium, high, critical)
+    authority: (police, ambulance, fire_brigade, disaster_response, rescue_team)
+
+    Message: {message}
+
+    Return JSON only.
+    """
+
+    response = model.generate_content(prompt)
+    return response.text
+
+# --------------------
+# ROUTE
+# --------------------
 @app.post("/api/emergency")
 def handle_emergency(data: Emergency):
-    ai_result = analyze_emergency(data.message)
-
-    category = ai_result.get("category", "GENERAL")
-    priority = ai_result.get("priority", "LOW")
-
-    route = route_case(category, priority)
-    team = assign_team(category)
+    ai_raw = ai_analyze(data.message)
 
     return {
-        "ai_analysis": ai_result,
-        "routing_decision": route,
-        "assigned_team": team,
+        "ai_raw": ai_raw,
         "location": data.location,
         "status": "DISPATCHED"
     }
