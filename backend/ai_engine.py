@@ -1,41 +1,20 @@
+import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+load_dotenv()
+
+genai.configure(api_key=os.getenv("AIzaSyC2duxKFeQ9STHv83NbPbU4HElPGybHsH0"))
+
+model = genai.GenerativeModel("gemini-pro")
+
 def analyze_emergency(message):
-    msg = message.lower()
+    prompt = f"""
+    Analyze this emergency message and return JSON with:
+    category, severity(1-5), urgency, risk, authority
 
-    if "collapse" in msg or "building" in msg or "earthquake" in msg:
-        return {
-            "type": "Structural Collapse",
-            "severity": 5,
-            "priority": "CRITICAL",
-            "risk": "Life-threatening"
-        }
+    Message: {message}
+    """
 
-    if "fire" in msg:
-        return {
-            "type": "Fire Accident",
-            "severity": 4,
-            "priority": "HIGH",
-            "risk": "Severe"
-        }
-
-    if "flood" in msg:
-        return {
-            "type": "Flood",
-            "severity": 3,
-            "priority": "MEDIUM",
-            "risk": "Moderate"
-        }
-
-    if "accident" in msg:
-        return {
-            "type": "Road Accident",
-            "severity": 4,
-            "priority": "HIGH",
-            "risk": "Severe"
-        }
-
-    return {
-        "type": "General Emergency",
-        "severity": 2,
-        "priority": "LOW",
-        "risk": "Low"
-    }
+    response = model.generate_content(prompt)
+    return response.text
