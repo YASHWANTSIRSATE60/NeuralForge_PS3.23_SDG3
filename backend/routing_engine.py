@@ -1,16 +1,14 @@
-from team_engine import select_team
+def route_case(category, priority):
+    if priority == "CRITICAL":
+        return "IMMEDIATE_DISPATCH"
 
-def route_case(ai_result, location):
-    team = select_team(ai_result["type"], ai_result["severity"])
+    if category in ["DISASTER", "FIRE"]:
+        return "EMERGENCY_FORCE"
 
-    return {
-        "case_id": "NF-PS3-001",
-        "type": ai_result["type"],
-        "severity": ai_result["severity"],
-        "priority": ai_result["priority"],
-        "risk": ai_result["risk"],
-        "location": location,
-        "assigned_team": team,
-        "status": "ASSIGNED",
-        "eta": "7 minutes"
-    }
+    if category in ["CRIME", "WOMEN_SAFETY", "CHILD_SAFETY"]:
+        return "LAW_ENFORCEMENT"
+
+    if category == "MEDICAL":
+        return "MEDICAL_SERVICES"
+
+    return "GENERAL_CONTROL"
