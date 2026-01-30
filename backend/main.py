@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from ai_engine import analyze_emergency
-from authority_engine import resolve_authority
-from notify import send_notification
+from routing_engine import route_case
+from team_engine import assign_team
 
 app = FastAPI()
 
@@ -18,21 +18,16 @@ def health():
 def handle_emergency(data: Emergency):
     ai_result = analyze_emergency(data.message)
 
-    category = ai_result.get("category")
-    priority = ai_result.get("priority")
+    category = ai_result["category"]
+    priority = ai_result["priority"]
 
-    authority = resolve_authority(category)
-
-    notification = send_notification(
-        authority,
-        data.message,
-        data.location,
-        priority
-    )
+    route = route_case(category, priority)
+    team = assign_team(category)
 
     return {
         "ai_analysis": ai_result,
-        "authority": authority,
-        "notification": notification,
+        "routing_decision": route,
+        "assigned_team": team,
+        "location": data.location,
         "status": "DISPATCHED"
     }
