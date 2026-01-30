@@ -1,17 +1,14 @@
-def select_team(emergency_type, severity):
-    teams = [
-        {"id": "T1", "type": "Fire Team", "status": "Available"},
-        {"id": "T2", "type": "Medical Team", "status": "Available"},
-        {"id": "T3", "type": "Disaster Response Team", "status": "Available"}
-    ]
+def assign_team(category):
+    mapping = {
+        "MEDICAL": "Ambulance + Hospital Team",
+        "FIRE": "Fire Brigade Unit",
+        "CRIME": "Police Unit",
+        "DISASTER": "NDRF / SDRF Team",
+        "WOMEN_SAFETY": "Women Safety Cell",
+        "CHILD_SAFETY": "Child Protection Unit",
+        "ACCIDENT": "Rescue + Ambulance",
+        "INFRASTRUCTURE": "Municipal Emergency Team",
+        "GENERAL": "Local Control Room"
+    }
 
-    if emergency_type == "Structural Collapse":
-        return teams[2]
-
-    if emergency_type == "Fire Accident":
-        return teams[0]
-
-    if emergency_type == "Road Accident":
-        return teams[1]
-
-    return teams[1]
+    return mapping.get(category, "Local Control Room")
