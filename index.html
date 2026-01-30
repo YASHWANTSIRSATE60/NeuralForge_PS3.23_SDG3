@@ -1,101 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>NeuralForge PS3.23 – AI Emergency Triage System</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>NeuralForge PS3.23 – AI Emergency Triage</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        body{
-            margin:0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: radial-gradient(circle at top, #0f172a, #020617);
-            color:white;
-            min-height:100vh;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-        }
-        .app{
-            width:95%;
-            max-width:900px;
-            background:rgba(15,23,42,0.85);
-            border:1px solid #0ea5e9;
-            border-radius:16px;
-            padding:30px;
-            box-shadow:0 0 40px rgba(14,165,233,0.15);
-        }
-        h1{
-            text-align:center;
-            color:#38bdf8;
-            margin-bottom:5px;
-        }
-        h2{
-            text-align:center;
-            font-weight:normal;
-            font-size:16px;
-            color:#cbd5f5;
-            margin-bottom:25px;
-        }
-        textarea,input{
-            width:100%;
-            padding:14px;
-            border-radius:10px;
-            border:none;
-            outline:none;
-            font-size:15px;
-            margin-bottom:15px;
-        }
-        textarea{resize:none;height:90px;}
-        button{
-            width:100%;
-            padding:16px;
-            border:none;
-            border-radius:12px;
-            background:#ef4444;
-            color:white;
-            font-size:16px;
-            cursor:pointer;
-            transition:0.2s;
-        }
-        button:hover{background:#dc2626;}
-        .output{
-            margin-top:25px;
-            padding:20px;
-            border-radius:12px;
-            background:rgba(2,6,23,0.8);
-            border:1px solid #0ea5e9;
-        }
-        .output h3{margin-top:0;color:#38bdf8;}
-        .row{margin-bottom:8px;}
-        .tag{
-            display:inline-block;
-            padding:6px 10px;
-            border-radius:20px;
-            background:#1d4ed8;
-            margin:4px 6px 0 0;
-            font-size:12px;
-        }
-        pre{
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            background:#020617;
-            padding:12px;
-            border-radius:8px;
-            border:1px solid #0ea5e9;
-            color:#e0f2fe;
-            font-size:13px;
-        }
-    </style>
+<style>
+body{
+    margin:0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    color:white;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.app{
+    width:95%;
+    max-width:900px;
+    background:rgba(15,23,42,0.85);
+    border:1px solid #0ea5e9;
+    border-radius:16px;
+    padding:30px;
+    box-shadow:0 0 40px rgba(14,165,233,0.15);
+}
+h1{text-align:center;color:#38bdf8;margin-bottom:5px;}
+h2{text-align:center;font-weight:normal;font-size:16px;color:#cbd5f5;margin-bottom:25px;}
+
+textarea,input{
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+    font-size:15px;
+    margin-bottom:15px;
+}
+textarea{resize:none;height:90px;}
+
+button{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:12px;
+    background:#ef4444;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+button:hover{background:#dc2626;}
+
+.output{
+    margin-top:25px;
+    padding:20px;
+    border-radius:12px;
+    background:rgba(2,6,23,0.8);
+    border:1px solid #0ea5e9;
+}
+
+.output h3{margin-top:0;color:#38bdf8;}
+
+.box{
+    background:#020617;
+    border:1px solid #0ea5e9;
+    padding:12px;
+    border-radius:8px;
+    margin-top:8px;
+    font-size:14px;
+    white-space:pre-wrap;
+}
+
+.tag{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:20px;
+    background:#1d4ed8;
+    margin:4px 6px 0 0;
+    font-size:12px;
+}
+</style>
 </head>
-<body>
 
+<body>
 <div class="app">
     <h1>🚨 NeuralForge PS3.23</h1>
     <h2>AI Emergency Triage System (SDG 3)</h2>
 
-    <textarea id="message" placeholder="Describe the emergency (e.g. building collapse, fire accident, heart attack, flood rescue, robbery)"></textarea>
-    <input id="location" placeholder="Enter location (city / area / GPS)" />
+    <textarea id="message" placeholder="Describe the emergency..."></textarea>
+    <input id="location" placeholder="Enter location" />
 
     <button onclick="sendEmergency()">Send Emergency</button>
 
@@ -104,42 +97,35 @@
 
 <script>
 async function sendEmergency(){
-    const message = document.getElementById("message").value;
-    const location = document.getElementById("location").value;
+    const message = document.getElementById("message").value.trim();
+    const location = document.getElementById("location").value.trim();
 
     if(!message || !location){
-        alert("Please enter emergency message and location");
+        alert("Enter message and location");
         return;
     }
 
-    const output = document.getElementById("output");
-    output.style.display = "block";
-    output.innerHTML = "<h3>Processing emergency with AI...</h3>";
+    const out = document.getElementById("output");
+    out.style.display = "block";
+    out.innerHTML = "<h3>Processing with AI...</h3>";
 
     try{
         const res = await fetch("https://neuralforge-backend.onrender.com/api/emergency",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({
-                message:message,
-                location:location
-            })
+            body:JSON.stringify({message, location})
         });
-
-        if(!res.ok){
-            throw new Error("Backend error: " + res.status);
-        }
 
         const data = await res.json();
 
-        output.innerHTML = `
+        out.innerHTML = `
             <h3>AI Decision Output</h3>
 
-            <div class="row"><b>Raw AI Analysis (Gemini Output)</b></div>
-            <pre>${data.ai_raw}</pre>
+            <b>Raw AI Analysis (Gemini Output)</b>
+            <div class="box">${data.ai_raw || "No AI response"}</div>
 
-            <div class="row"><b>Location:</b> ${data.location}</div>
-            <div class="row"><b>Status:</b> ${data.status}</div>
+            <p><b>Location:</b> ${data.location || "-"}</p>
+            <p><b>Status:</b> ${data.status || "-"}</p>
 
             <div style="margin-top:12px;">
                 <span class="tag">AI Engine</span>
@@ -149,15 +135,10 @@ async function sendEmergency(){
                 <span class="tag">SDG 3</span>
             </div>
         `;
-
-    }catch(e){
-        output.innerHTML = `
-            <h3>Error</h3>
-            <p>${e.message}</p>
-        `;
+    }catch(err){
+        out.innerHTML = `<h3>Error</h3><div class="box">${err}</div>`;
     }
 }
 </script>
-
 </body>
 </html>
