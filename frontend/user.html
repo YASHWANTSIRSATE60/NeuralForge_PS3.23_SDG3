@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Response - Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        textarea, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .clear-btn {
+            background: #f1f1f1;
+            color: #666;
+        }
+        
+        .clear-btn:hover {
+            background: #e1e1e1;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e1e1e1;
+        }
+        
+        .result-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #ffd700;
+            color: #333;
+        }
+        
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .analysis-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .analysis-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .analysis-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .priority-critical { color: #dc3545; }
+        .priority-high { color: #fd7e14; }
+        .priority-medium { color: #ffc107; }
+        .priority-low { color: #28a745; }
+        
+        .error {
+            background: #fee;
+            color: #dc3545;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #dc3545;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .emergency-id {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Emergency Response</h1>
+            <p>AI-Powered Emergency Assistance System</p>
+        </div>
+        
+        <div class="content">
+            <div class="form-group">
+                <label for="location">Emergency Location</label>
+                <input 
+                    type="text" 
+                    id="location" 
+                    placeholder="e.g., 123 Main Street, Downtown"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Emergency Details</label>
+                <textarea 
+                    id="message" 
+                    placeholder="Describe the emergency situation in detail..."
+                    required
+                ></textarea>
+            </div>
+            
+            <div class="button-group">
+                <button class="submit-btn" onclick="submitEmergency()">
+                    Send Emergency Alert
+                </button>
+                <button class="clear-btn" onclick="clearForm()">
+                    Clear Form
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>AI is analyzing your emergency...</p>
+            </div>
+            
+            <div class="error" id="error">
+                <strong>Error:</strong> <span id="error-message"></span>
+            </div>
+            
+            <div class="result" id="result">
+                <div class="result-header">
+                    <div class="result-title">Emergency Response Analysis</div>
+                    <div class="status-badge status-pending">PENDING</div>
+                </div>
+                
+                <div class="emergency-id">
+                    Incident ID: <span id="incident-id">-</span>
+                </div>
+                
+                <div class="analysis-grid">
+                    <div class="analysis-item">
+                        <div class="analysis-label">Category</div>
+                        <div class="analysis-value" id="category">-</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-label">Priority</div>
+                        <div class="analysis-value" id="priority">-</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-label">Severity</div>
+                        <div class="analysis-value" id="severity">-</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-label">Risk Level</div>
+                        <div class="analysis-value" id="risk">-</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-label">Required Help</div>
+                        <div class="analysis-value" id="required-help">-</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-label">Authority</div>
+                        <div class="analysis-value" id="authority">-</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-label">Assigned Team</div>
+                        <div class="analysis-value" id="assigned-team">-</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-label">Location</div>
+                        <div class="analysis-value" id="result-location">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        
+        function submitEmergency() {
+            const location = document.getElementById('location').value.trim();
+            const message = document.getElementById('message').value.trim();
+            
+            if (!location || !message) {
+                showError('Please fill in both location and emergency details');
+                return;
+            }
+            
+            // Show loading, hide error and result
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').classList.remove('show');
+            document.getElementById('result').classList.remove('show');
+            
+            // Disable submit button
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            
+            // Make API request
+            fetch(`${API_BASE_URL}/api/emergency`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    location: location
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update UI with response
+                document.getElementById('incident-id').textContent = data.id;
+                document.getElementById('category').textContent = data.category;
+                document.getElementById('priority').textContent = data.priority;
+                document.getElementById('severity').textContent = data.severity;
+                document.getElementById('risk').textContent = data.risk;
+                document.getElementById('required-help').textContent = data.required_help;
+                document.getElementById('authority').textContent = data.authority;
+                document.getElementById('assigned-team').textContent = data.assigned_team;
+                document.getElementById('result-location').textContent = data.location;
+                
+                // Add priority class for color coding
+                document.getElementById('priority').className = `analysis-value priority-${data.priority}`;
+                document.getElementById('severity').className = `analysis-value priority-${data.severity}`;
+                document.getElementById('risk').className = `analysis-value priority-${data.risk}`;
+                
+                // Hide loading, show result
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('result').classList.add('show');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError(error.message || 'Failed to send emergency report');
+                document.getElementById('loading').style.display = 'none';
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+            });
+        }
+        
+        function clearForm() {
+            document.getElementById('location').value = '';
+            document.getElementById('message').value = '';
+            document.getElementById('error').classList.remove('show');
+            document.getElementById('result').classList.remove('show');
+        }
+        
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error').classList.add('show');
+        }
+        
+        // Initialize loading state
+        document.getElementById('loading').style.display = 'none';
+    </script>
+</body>
+</html>
