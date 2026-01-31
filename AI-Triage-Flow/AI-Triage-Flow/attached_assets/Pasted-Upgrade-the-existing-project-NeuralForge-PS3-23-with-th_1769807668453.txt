@@ -1,0 +1,156 @@
+Upgrade the existing project "NeuralForge PS3.23" with the following advanced features.
+
+====================================
+FEATURE SET
+====================================
+
+🌍 MULTI-LANGUAGE SUPPORT
+Frontend:
+- Add language selector dropdown:
+  Languages:
+  - English
+  - Hindi
+  - Marathi
+  - Tamil
+  - Telugu
+
+- Use browser translation API OR simple translation map for UI labels
+- Emergency message input should support any language
+- Backend must send original message to AI
+- AI prompt must include: "Language: auto-detect"
+
+Backend:
+- Modify Gemini prompt to auto-detect language
+- Add detected_language field in AI JSON output:
+  {
+    detected_language: ""
+  }
+
+====================================
+
+🎙 VOICE TO TEXT (SPEECH INPUT)
+Frontend:
+- Add microphone button
+- Use Web Speech API:
+  window.SpeechRecognition / webkitSpeechRecognition
+- Convert voice to text
+- Auto-fill emergency textarea
+- Support continuous listening mode
+- Show "Listening..." indicator
+
+====================================
+
+📍 AUTO LOCATION DETECTION
+Frontend:
+- Use Geolocation API:
+  navigator.geolocation.getCurrentPosition()
+- Auto-detect:
+  - Latitude
+  - Longitude
+- Reverse geocode using OpenStreetMap API
+- Auto-fill location input field
+- Add "Detect Location" button
+- Show accuracy indicator
+
+====================================
+
+🧠 SMART UI FEATURES
+Frontend:
+- Loading animation
+- AI processing indicator
+- Voice status indicator
+- Language indicator
+- Location detection indicator
+- Error banners
+- Offline mode detection
+- Network status indicator
+
+====================================
+
+🔐 SECURITY & UX
+- No API keys in frontend
+- All AI calls via backend
+- Proper error handling
+- Input validation
+- Rate limiting protection
+- Spam prevention
+- API request debouncing
+
+====================================
+
+🧱 STRUCTURE
+Update project structure:
+
+frontend/
+  index.html
+  styles.css
+  app.js
+  voice.js
+  location.js
+  translate.js
+
+backend/
+  main.py
+  ai_engine.py
+  routing_engine.py
+  requirements.txt
+
+====================================
+
+BACKEND AI UPGRADE
+Modify Gemini prompt to return:
+
+{
+  category,
+  priority,
+  severity,
+  risk,
+  required_help,
+  authority,
+  detected_language,
+  confidence_score
+}
+
+====================================
+
+IMPORTANT RULES
+====================================
+- No mock data
+- No fake outputs
+- No static responses
+- No demo placeholders
+- Must use real browser APIs
+- Must use real fetch()
+- Must use real backend calls
+- Must be deployable
+- Must be production-structured
+- Must be scalable
+- Must be hackathon-grade
+- Must be clean architecture
+- Must include comments
+- Must include error handling
+
+====================================
+
+OUTPUT FORMAT
+====================================
+Generate all updated files with full code:
+- backend files
+- frontend files
+- JS modules
+- CSS
+- Updated prompts
+- API contracts
+- Data flow
+
+====================================
+
+SYSTEM GOAL
+====================================
+Create a real AI-powered emergency response interface that supports:
+- multi-language input
+- voice-based emergency reporting
+- automatic location detection
+- intelligent AI routing
+- real-time UX feedback
+- production-grade architecture

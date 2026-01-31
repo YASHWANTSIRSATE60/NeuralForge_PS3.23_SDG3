@@ -1,0 +1,237 @@
+Extend the existing project "NeuralForge PS3.23" by creating a full Responder Dashboard (Rescue Team / Authority Dashboard).
+
+====================================
+RESPONDER DASHBOARD (NEW SYSTEM)
+====================================
+
+Create a separate dashboard interface for:
+
+- Rescue Teams
+- Ambulance Teams
+- Police
+- Fire Brigade
+- Disaster Response Teams
+- Admin Control Room
+
+This is NOT user UI.
+This is the professional emergency operations interface.
+
+====================================
+FEATURES
+====================================
+
+📡 REAL-TIME INCIDENT FEED
+- Live list of incoming emergency requests
+- Auto-refresh / real-time updates
+- WebSocket or polling-based updates
+- New incident highlight animation
+- Priority-based sorting:
+  - Critical first
+  - High
+  - Medium
+  - Low
+
+Each incident card must show:
+- Incident ID
+- Message from user
+- AI category
+- Priority
+- Severity
+- Risk
+- Required help
+- Authority type
+- Location (text)
+- GPS coordinates
+- Detected language
+- Time received
+- Status
+
+====================================
+
+📍 MAP VIEW
+- Live map (OpenStreetMap / Leaflet.js)
+- Pin drop for each emergency
+- Color-coded markers:
+  - Red = Critical
+  - Orange = High
+  - Yellow = Medium
+  - Green = Low
+- Click marker → incident details panel
+
+====================================
+
+🔔 NOTIFICATION SYSTEM
+- Real-time alerts
+- Sound alerts
+- Visual alert popup
+- Priority-based alert tones
+- Browser notifications API
+- Desktop notification permission
+
+====================================
+
+🧭 TEAM OPERATIONS PANEL
+For each incident:
+- Accept incident button
+- Reject incident button
+- Escalate incident
+- Mark as "In Progress"
+- Mark as "Resolved"
+- Add response notes
+- Assign team members
+- Set ETA
+- Update status
+
+====================================
+
+📊 CONTROL ROOM DASHBOARD
+Admin view:
+- Total incidents
+- Active incidents
+- Resolved incidents
+- Pending incidents
+- Team availability
+- Response time stats
+- Heatmap view
+- Analytics charts
+
+====================================
+
+BACKEND UPGRADES
+====================================
+
+Add new API endpoints:
+
+POST /api/emergency            -> create incident
+GET  /api/incidents            -> list all incidents
+GET  /api/incidents/active     -> active only
+GET  /api/incidents/{id}       -> incident detail
+POST /api/incidents/{id}/accept
+POST /api/incidents/{id}/resolve
+POST /api/incidents/{id}/assign
+POST /api/incidents/{id}/status
+
+====================================
+
+DATA MODEL
+====================================
+
+Incident Schema:
+{
+  incident_id,
+  message,
+  category,
+  priority,
+  severity,
+  risk,
+  required_help,
+  authority,
+  location_text,
+  latitude,
+  longitude,
+  detected_language,
+  status,
+  assigned_team,
+  eta,
+  created_at,
+  updated_at
+}
+
+====================================
+
+TECH STACK
+====================================
+
+Frontend:
+- HTML
+- CSS
+- JavaScript
+- Leaflet.js (maps)
+- WebSocket / polling
+- Browser Notification API
+
+Backend:
+- FastAPI
+- WebSocket support
+- In-memory DB or SQLite
+- Real-time event broadcasting
+- CORS enabled
+- Role-based endpoints
+- API authentication (basic token auth)
+
+====================================
+
+PROJECT STRUCTURE
+====================================
+
+frontend/
+  user/
+    index.html
+    app.js
+    styles.css
+
+  responder/
+    dashboard.html
+    responder.js
+    responder.css
+    map.js
+    notifications.js
+
+backend/
+  main.py
+  ai_engine.py
+  routing_engine.py
+  incident_store.py
+  websocket_manager.py
+  auth.py
+  requirements.txt
+
+====================================
+
+IMPORTANT RULES
+====================================
+
+- No mock data
+- No fake incidents
+- No static JSON
+- No hardcoded alerts
+- Must use real backend data
+- Must use real API calls
+- Must support real-time updates
+- Must be scalable
+- Must be modular
+- Must be deployable
+- Must be production structured
+- Must be hackathon-grade
+- Must support future mobile app
+- Must support multi-agency system
+
+====================================
+
+SYSTEM GOAL
+====================================
+
+Create a real Emergency Operations Platform:
+
+User Dashboard → Incident Creation  
+AI Engine → Classification  
+Routing Engine → Authority Mapping  
+Incident Store → Persistence  
+Responder Dashboard → Live Operations  
+Admin Panel → Control Room  
+Notification Engine → Alerts  
+Map Engine → Geo Visualization  
+
+====================================
+
+OUTPUT
+====================================
+
+Generate:
+- Full responder dashboard frontend
+- Backend API upgrades
+- WebSocket system
+- Incident management system
+- Database schema
+- Real-time architecture
+- Full code files
