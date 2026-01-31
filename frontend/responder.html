@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Response Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transform: translate(50px, -50px);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+            max-width: 600px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .incidents-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .refresh-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #666;
+        }
+        
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .refresh-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .incidents-list {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .incident-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .incident-card.critical {
+            border-left-color: #dc3545;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2); }
+            50% { box-shadow: 0 5px 25px rgba(220, 53, 69, 0.4); }
+            100% { box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2); }
+        }
+        
+        .incident-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .incident-id {
+            font-size: 14px;
+            color: #666;
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 15px;
+        }
+        
+        .incident-time {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .incident-category {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #667eea;
+            color: white;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .incident-message {
+            margin: 15px 0;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .incident-footer {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .footer-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .footer-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .footer-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .priority-critical { color: #dc3545; }
+        .priority-high { color: #fd7e14; }
+        .priority-medium { color: #ffc107; }
+        .priority-low { color: #28a745; }
+        
+        .location {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .authority-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #fee;
+            color: #dc3545;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc3545;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .incident-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .incident-footer {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                🚑 Emergency Response Dashboard
+                <span style="font-size: 14px; opacity: 0.8; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px;">
+                    Real-time Updates
+                </span>
+            </h1>
+            <p>Live monitoring of all emergency incidents with AI analysis</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-incidents">0</div>
+                <div class="stat-label">Total Incidents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="critical-incidents">0</div>
+                <div class="stat-label">Critical Priority</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pending-incidents">0</div>
+                <div class="stat-label">Pending Response</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="active-teams">0</div>
+                <div class="stat-label">Active Teams</div>
+            </div>
+        </div>
+        
+        <div class="error" id="error">
+            <strong>Connection Error:</strong> <span id="error-message"></span>
+        </div>
+        
+        <div class="incidents-header">
+            <h2>Active Incidents</h2>
+            <div class="refresh-info">
+                <span>Auto-refresh in <span id="countdown">5</span>s</span>
+                <button class="refresh-btn" onclick="loadIncidents()">
+                    Refresh Now
+                </button>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner" style="width: 40px; height: 40px; margin: 0 auto 20px;"></div>
+            <p>Loading incidents...</p>
+        </div>
+        
+        <div class="incidents-list" id="incidents-list">
+            <!-- Incidents will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        let refreshInterval;
+        let countdown = 5;
+        
+        function loadIncidents() {
+            // Show loading, hide error
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').classList.remove('show');
+            
+            // Reset countdown
+            countdown = 5;
+            document.getElementById('countdown').textContent = countdown;
+            
+            fetch(`${API_BASE_URL}/api/incidents`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(incidents => {
+                    // Update stats
+                    document.getElementById('total-incidents').textContent = incidents.length;
+                    
+                    const critical = incidents.filter(i => 
+                        i.priority === 'critical' || i.severity === 'critical'
+                    ).length;
+                    document.getElementById('critical-incidents').textContent = critical;
+                    
+                    const pending = incidents.filter(i => 
+                        i.status === 'pending'
+                    ).length;
+                    document.getElementById('pending-incidents').textContent = pending;
+                    
+                    const uniqueTeams = new Set(incidents.map(i => i.assigned_team));
+                    document.getElementById('active-teams').textContent = uniqueTeams.size;
+                    
+                    // Render incidents
+                    renderIncidents(incidents);
+                    
+                    // Hide loading
+                    document.getElementById('loading').style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Error loading incidents:', error);
+                    showError(error.message || 'Failed to load incidents');
+                    document.getElementById('loading').style.display = 'none';
+                });
+        }
+        
+        function renderIncidents(incidents) {
+            const container = document.getElementById('incidents-list');
+            
+            if (incidents.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🚑</div>
+                        <h3>No Active Incidents</h3>
+                        <p>No emergency incidents have been reported yet.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort incidents: critical first, then by timestamp
+            incidents.sort((a, b) => {
+                if (a.priority === 'critical' && b.priority !== 'critical') return -1;
+                if (b.priority === 'critical' && a.priority !== 'critical') return 1;
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+            
+            container.innerHTML = incidents.map(incident => `
+                <div class="incident-card ${incident.priority === 'critical' ? 'critical' : ''}">
+                    <div class="incident-header">
+                        <div>
+                            <div class="incident-id">Incident #${incident.id}</div>
+                            <div class="incident-category" style="margin-top: 10px;">
+                                ${incident.category}
+                            </div>
+                        </div>
+                        <div class="incident-time">
+                            ${new Date(incident.timestamp).toLocaleString()}
+                        </div>
+                    </div>
+                    
+                    <div class="incident-message">
+                        <strong>Emergency:</strong> ${incident.message}
+                    </div>
+                    
+                    <div class="incident-footer">
+                        <div class="footer-item">
+                            <span class="footer-label">Location</span>
+                            <span class="footer-value location">${incident.location}</span>
+                        </div>
+                        <div class="footer-item">
+                            <span class="footer-label">Priority</span>
+                            <span class="footer-value priority-${incident.priority}">
+                                ${incident.priority}
+                            </span>
+                        </div>
+                        <div class="footer-item">
+                            <span class="footer-label">Severity</span>
+                            <span class="footer-value priority-${incident.severity}">
+                                ${incident.severity}
+                            </span>
+                        </div>
+                        <div class="footer-item">
+                            <span class="footer-label">Authority</span>
+                            <span class="footer-value authority-badge">
+                                ${incident.authority.replace('_', ' ')}
+                            </span>
+                        </div>
+                        <div class="footer-item">
+                            <span class="footer-label">Assigned Team</span>
+                            <span class="footer-value">${incident.assigned_team}</span>
+                        </div>
+                        <div class="footer-item">
+                            <span class="footer-label">Status</span>
+                            <span class="footer-value">${incident.status}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error').classList.add('show');
+        }
+        
+        function startAutoRefresh() {
+            // Clear existing interval
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            
+            // Load immediately
+            loadIncidents();
+            
+            // Set up countdown
+            refreshInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('countdown').textContent = countdown;
+                
+                if (countdown <= 0) {
+                    loadIncidents();
+                    countdown = 5;
+                }
+            }, 1000);
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            startAutoRefresh();
+        });
+    </script>
+</body>
+</html>
